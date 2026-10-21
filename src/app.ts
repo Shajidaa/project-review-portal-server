@@ -1,5 +1,7 @@
 import cors from "cors";
 import express, { Application, Request, Response } from "express";
+import { globalErrorHandler } from "./app/errors/globalErrorHandler";
+import notFoundHandler from "./app/middleware/notFound";
 
 const app: Application = express();
 
@@ -33,5 +35,8 @@ app.get("/", (_req: Request, res: Response) => {
     version: "1.0.0",
   });
 });
-
+// 5. Global Error Handler
+app.use(globalErrorHandler);
+// 6. Not Found Handler
+app.use(notFoundHandler);
 export default app;
