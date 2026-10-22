@@ -1,0 +1,15 @@
+enum Role {
+    STUDENT
+    MENTOR
+    ADMIN
+}
+
+enum AuthProvider {
+    CREDENTIAL
+    GOOGLE
+}
+
+enum Gender {
+    MALE
+    FEMALE
+}

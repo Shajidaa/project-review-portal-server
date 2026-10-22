@@ -1,0 +1,18 @@
+model User {
+    id            String       @id @default(uuid())
+    email         String       @unique
+    password      String?
+    name          String
+    role          Role         @default(STUDENT)
+    googleId      String?      @unique
+    authProvider  AuthProvider @default(CREDENTIAL) @map("auth_provider")
+    emailVerified Boolean      @default(false) @map("email_verified")
+
+    gender Gender?
+    // Relations
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([email])
+}

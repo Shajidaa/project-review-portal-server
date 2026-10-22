@@ -1,8 +1,9 @@
 import cors from "cors";
-import express, { Application, Request, Response } from "express";
+import express, { Application, NextFunction, Request, Response } from "express";
 import { globalErrorHandler } from "./app/errors/globalErrorHandler";
 import notFoundHandler from "./app/middleware/notFound";
 import v1Routes from "./app/v1/routes";
+import AppError from "./app/errors/appError";
 
 const app: Application = express();
 
@@ -37,6 +38,10 @@ app.get("/", (_req: Request, res: Response) => {
   });
 });
 app.use("/api/v1", v1Routes);
+// 404 Handler
+app.use((req: Request, _res: Response, next: NextFunction) => {
+  next(new AppError(404, `Route not found: ${req.originalUrl}`));
+});
 // 5. Global Error Handler
 app.use(globalErrorHandler);
 // 6. Not Found Handler
