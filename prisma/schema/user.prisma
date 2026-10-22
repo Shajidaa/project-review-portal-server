@@ -5,6 +5,7 @@ model User {
     name          String
     role          Role         @default(STUDENT)
     googleId      String?      @unique
+    avatarUrl     String?      @map("avatar_url")
     authProvider  AuthProvider @default(CREDENTIAL) @map("auth_provider")
     emailVerified Boolean      @default(false) @map("email_verified")
 
@@ -15,4 +16,5 @@ model User {
     updatedAt DateTime @updatedAt
 
     @@index([email])
+    @@map("users")
 }
