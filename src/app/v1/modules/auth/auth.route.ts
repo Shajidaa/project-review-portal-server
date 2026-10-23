@@ -5,9 +5,36 @@ import { AuthValidation } from "./auth.validation";
 
 const router = Router();
 
-router.post("/register", validateRequest(AuthValidation.registerSchema), AuthController.register);
-router.post("/login", validateRequest(AuthValidation.loginSchema), AuthController.login);
-router.post("/refresh-token", validateRequest(AuthValidation.refreshTokenSchema), AuthController.refreshToken);
+router.post(
+  "/register",
+  validateRequest(AuthValidation.registerSchema),
+  AuthController.register,
+);
+
+router.post(
+  "/verify-email",
+  validateRequest(AuthValidation.verifyEmailSchema),
+  AuthController.verifyEmail,
+);
+
+router.post(
+  "/resend-otp",
+  validateRequest(AuthValidation.resendOtpSchema),
+  AuthController.resendOtp,
+);
+
+router.post(
+  "/login",
+  validateRequest(AuthValidation.loginSchema),
+  AuthController.login,
+);
+
+router.post(
+  "/refresh-token",
+  validateRequest(AuthValidation.refreshTokenSchema),
+  AuthController.refreshToken,
+);
+
 router.post("/logout", AuthController.logout);
 
 export const AuthRoutes = router;

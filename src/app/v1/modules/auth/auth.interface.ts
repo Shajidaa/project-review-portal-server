@@ -19,3 +19,12 @@ export interface IAuthTokens {
   accessToken: string;
   refreshToken: string;
 }
+
+export interface IVerifyEmail {
+  email: string;
+  otp: string;
+}
+
+export interface IResendOtp {
+  email: string;
+}

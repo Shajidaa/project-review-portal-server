@@ -6,15 +6,37 @@ import { AuthService } from "./auth.service";
 import { cookieOptions, setAuthCookies } from "../../../utils/setCookies";
 
 const register = catchAsync(async (req: Request, res: Response) => {
-  const { accessToken, refreshToken } = await AuthService.register(req.body);
-
-  setAuthCookies(res, accessToken, refreshToken);
+  const { email, name } = await AuthService.register(req.body);
 
   sendResponse(res, {
     statusCode: httpStatus.CREATED,
     success: true,
-    message: "User registered successfully",
+    message: "Registration successful. Please check your email for the OTP.",
+    data: { email, name },
+  });
+});
+
+const verifyEmail = catchAsync(async (req: Request, res: Response) => {
+  const { accessToken, refreshToken } = await AuthService.verifyEmail(req.body);
+
+  setAuthCookies(res, accessToken, refreshToken);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Email verified successfully",
     data: { accessToken, refreshToken },
+  });
+});
+
+const resendOtp = catchAsync(async (req: Request, res: Response) => {
+  await AuthService.resendOtp(req.body);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "OTP resent successfully. Please check your email.",
+    data: null,
   });
 });
 
@@ -68,4 +90,11 @@ const logout = catchAsync(async (_req: Request, res: Response) => {
   });
 });
 
-export const AuthController = { register, login, refreshToken, logout };
+export const AuthController = {
+  register,
+  verifyEmail,
+  resendOtp,
+  login,
+  refreshToken,
+  logout,
+};

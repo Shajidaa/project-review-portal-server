@@ -12,6 +12,22 @@ const registerSchema = z.object({
     }),
 });
 
+const verifyEmailSchema = z.object({
+    body: z.object({
+        email: z.email("Invalid email address"),
+        otp: z
+            .string({ error: "OTP is required" })
+            .length(6, "OTP must be exactly 6 digits")
+            .regex(/^\d{6}$/, "OTP must contain only digits"),
+    }),
+});
+
+const resendOtpSchema = z.object({
+    body: z.object({
+        email: z.email("Invalid email address"),
+    }),
+});
+
 const loginSchema = z.object({
     body: z.object({
         email: z.email("Invalid email address"),
@@ -25,4 +41,10 @@ const refreshTokenSchema = z.object({
     }),
 });
 
-export const AuthValidation = { registerSchema, loginSchema, refreshTokenSchema };
+export const AuthValidation = {
+    registerSchema,
+    verifyEmailSchema,
+    resendOtpSchema,
+    loginSchema,
+    refreshTokenSchema,
+};
