@@ -1,4 +1,5 @@
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import express, { Application, NextFunction, Request, Response } from "express";
 import { globalErrorHandler } from "./app/errors/globalErrorHandler";
 import notFoundHandler from "./app/middleware/notFound";
@@ -28,6 +29,7 @@ app.use(
 // 3. Body Parsers
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 // 4. Root Health Check Endpoint
 app.get("/", (_req: Request, res: Response) => {

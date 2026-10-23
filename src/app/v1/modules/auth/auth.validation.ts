@@ -1,0 +1,28 @@
+import { z } from "zod";
+
+const registerSchema = z.object({
+    body: z.object({
+        name: z.string({ error: "Name is required" }).min(2, "Name must be at least 2 characters"),
+        email: z.email("Invalid email address"),
+        password: z
+            .string({ error: "Password is required" })
+            .min(8, "Password must be at least 8 characters")
+            .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+            .regex(/[0-9]/, "Password must contain at least one number"),
+    }),
+});
+
+const loginSchema = z.object({
+    body: z.object({
+        email: z.email("Invalid email address"),
+        password: z.string({ error: "Password is required" }).min(1, "Password is required"),
+    }),
+});
+
+const refreshTokenSchema = z.object({
+    body: z.object({
+        refreshToken: z.string().optional(),
+    }),
+});
+
+export const AuthValidation = { registerSchema, loginSchema, refreshTokenSchema };
