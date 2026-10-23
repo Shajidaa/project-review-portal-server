@@ -61,9 +61,20 @@ const login = async (payload: ILogin) => {
   });
 
   if (!user) {
-    throw new AppError(httpStatus.UNAUTHORIZED, "Invalid email or password");
+    throw new AppError(httpStatus.UNAUTHORIZED, "Invalid email ");
   }
-
+  if (
+    user.password !== undefined &&
+    !bcrypt.compareSync(payload.password, user.password as string)
+  ) {
+    throw new AppError(httpStatus.BAD_REQUEST, "Password is not correct");
+  }
+  if (user.authProvider !== "CREDENTIAL" || !user.password) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      "This account uses social sign-in. Please use the correct provider.",
+    );
+  }
   if (user.authProvider !== "CREDENTIAL" || !user.password) {
     throw new AppError(
       httpStatus.BAD_REQUEST,
