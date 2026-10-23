@@ -13,3 +13,30 @@ enum Gender {
     MALE
     FEMALE
 }
+
+enum repo {
+    Frontend
+    Backend
+    Fullstack
+    Mobile
+    Other
+}
+
+enum ProjectType {
+    WEB
+    MOBILE
+
+    OTHER
+}
+
+enum ReviewStatus {
+    PENDING
+    APPROVED
+    REJECTED
+}
+
+enum SubmissionStatus {
+    PENDING
+    APPROVED
+    REJECTED
+}

@@ -1,0 +1,31 @@
+model Submission {
+    id           String      @id @default(uuid())
+    projectName  String
+    projectType  ProjectType @map("project_type")
+    projectImage String?     @map("project_image")
+    repoUrl      String      @unique // Prevents same repository being submitted multiple times
+    liveLink     String
+
+    description String           @db.Text
+    status      SubmissionStatus @default(PENDING)
+    repoStack   repo             @default(Frontend) @map("repo")
+
+    // Student Relation
+    studentId String
+    student   User   @relation("StudentSubmissions", fields: [studentId], references: [id], onDelete: Cascade)
+
+    // Mentor/Reviewer Relation
+    reviewedById   String?
+    reviewedBy     User?        @relation("MentorReviews", fields: [reviewedById], references: [id], onDelete: SetNull)
+    reviewedAt     DateTime?
+    reviewComments String?      @db.Text
+    reviewStatus   ReviewStatus @default(PENDING)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    // Performance indexes for server-side filtering, sorting, & status aggregations
+    @@index([status])
+    @@index([studentId])
+    @@index([createdAt(sort: Desc)])
+}
