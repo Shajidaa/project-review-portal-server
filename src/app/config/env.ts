@@ -18,4 +18,11 @@ export default {
   tester_admin_name: process.env.TESTER_ADMIN_NAME!,
   tester_admin_email: process.env.TESTER_ADMIN_EMAIL!,
   tester_admin_password: process.env.TESTER_ADMIN_PASSWORD!,
+  redis_user: process.env.REDIS_USER!,
+  redis_password: process.env.REDIS_PASSWORD!,
+  redis_host: process.env.REDIS_HOST!,
+  redis_port: process.env.REDIS_PORT!,
+  smtp_user: process.env.SMTP_USER!,
+  smtp_password: process.env.SMTP_PASSWORD!,
+  email_sender: process.env.EMAIL_SENDER!,
 };
