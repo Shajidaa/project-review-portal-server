@@ -90,6 +90,28 @@ const logout = catchAsync(async (_req: Request, res: Response) => {
   });
 });
 
+const forgotPassword = catchAsync(async (req: Request, res: Response) => {
+  await AuthService.forgotPassword(req.body);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "If that email exists, a reset code has been sent.",
+    data: null,
+  });
+});
+
+const resetPassword = catchAsync(async (req: Request, res: Response) => {
+  await AuthService.resetPassword(req.body);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Password reset successfully. You can now log in.",
+    data: null,
+  });
+});
+
 export const AuthController = {
   register,
   verifyEmail,
@@ -97,4 +119,6 @@ export const AuthController = {
   login,
   refreshToken,
   logout,
+  forgotPassword,
+  resetPassword,
 };

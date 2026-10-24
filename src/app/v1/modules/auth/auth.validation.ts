@@ -41,10 +41,33 @@ const refreshTokenSchema = z.object({
     }),
 });
 
+const forgotPasswordSchema = z.object({
+    body: z.object({
+        email: z.email("Invalid email address"),
+    }),
+});
+
+const resetPasswordSchema = z.object({
+    body: z.object({
+        email: z.email("Invalid email address"),
+        otp: z
+            .string({ error: "OTP is required" })
+            .length(6, "OTP must be exactly 6 digits")
+            .regex(/^\d{6}$/, "OTP must contain only digits"),
+        newPassword: z
+            .string({ error: "Password is required" })
+            .min(8, "Password must be at least 8 characters")
+            .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+            .regex(/[0-9]/, "Password must contain at least one number"),
+    }),
+});
+
 export const AuthValidation = {
     registerSchema,
     verifyEmailSchema,
     resendOtpSchema,
     loginSchema,
     refreshTokenSchema,
+    forgotPasswordSchema,
+    resetPasswordSchema,
 };

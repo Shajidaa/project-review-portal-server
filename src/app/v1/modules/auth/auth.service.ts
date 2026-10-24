@@ -12,7 +12,9 @@ import {
   generateOtp,
   sendOtpEmail,
   sendWelcomeEmail,
+  sendForgotPasswordOtpEmail,
   OTP_TTL_SECONDS,
+  RESET_OTP_TTL_SECONDS,
 } from "../../../utils/email.utils";
 import type {
   IRegister,
@@ -20,6 +22,8 @@ import type {
   ITokenPayload,
   IVerifyEmail,
   IResendOtp,
+  IForgotPassword,
+  IResetPassword,
 } from "./auth.interface";
 import config from "../../../config/env";
 
@@ -193,4 +197,67 @@ const refreshToken = async (token: string) => {
   return buildTokens({ id: user.id, email: user.email, role: user.role });
 };
 
-export const AuthService = { register, verifyEmail, resendOtp, login, refreshToken };
+const RESET_KEY = (email: string) => `reset_otp:${email}`;
+
+// ─── Forgot Password ──────────────────────────────────────────────────────────
+// Generates a reset OTP and emails it. Always responds the same way to avoid
+// user enumeration (don't reveal if the email exists or not in the response).
+const forgotPassword = async (payload: IForgotPassword) => {
+  const user = await prisma.user.findUnique({ where: { email: payload.email } });
+
+  if (user && user.authProvider === "CREDENTIAL") {
+    const otp = generateOtp();
+    await redisClient.setEx(RESET_KEY(user.email), RESET_OTP_TTL_SECONDS, otp);
+    sendForgotPasswordOtpEmail(user.email, user.name, otp).catch((err) =>
+      console.error("[Forgot Password Email Error]", err),
+    );
+  }
+
+  // Always return the same shape — prevents email enumeration
+  return { email: payload.email };
+};
+
+// ─── Reset Password ───────────────────────────────────────────────────────────
+const resetPassword = async (payload: IResetPassword) => {
+  const { email, otp, newPassword } = payload;
+
+  const user = await prisma.user.findUnique({ where: { email } });
+
+  if (!user || user.authProvider !== "CREDENTIAL") {
+    throw new AppError(httpStatus.BAD_REQUEST, "Invalid request");
+  }
+
+  const storedOtp = await redisClient.get(RESET_KEY(email));
+
+  if (!storedOtp) {
+    throw new AppError(
+      httpStatus.GONE,
+      "Reset code has expired. Please request a new one.",
+    );
+  }
+
+  if (storedOtp !== otp) {
+    throw new AppError(httpStatus.UNPROCESSABLE_ENTITY, "Invalid reset code");
+  }
+
+  const hashedPassword = await bcrypt.hash(newPassword, config.salt_rounds);
+
+  await prisma.user.update({
+    where: { email },
+    data: { password: hashedPassword },
+  });
+
+  await redisClient.del(RESET_KEY(email));
+
+  return { email };
+};
+
+export const AuthService = {
+  register,
+  verifyEmail,
+  resendOtp,
+  login,
+  refreshToken,
+  forgotPassword,
+  resetPassword,
+};
