@@ -69,8 +69,10 @@ const createSubmission = async (
 
 // ── Student: own submissions ──────────────────────────────────────────────────
 const getMySubmissions = async (studentId: string, query: ISubmissionQuery) => {
-  const { page = 1, limit = 10, status } = query;
-  const skip = (page - 1) * limit;
+  const limit = Number(query.limit) || 10;
+  const page = Number(query.page) || 1;
+  const { status } = query;
+  const skip = Number((page - 1) * limit);
 
   const where = { studentId, ...(status && { status }) };
 

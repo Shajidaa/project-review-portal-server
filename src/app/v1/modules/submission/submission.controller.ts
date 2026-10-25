@@ -21,6 +21,7 @@ const createSubmission = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getMySubmissions = catchAsync(async (req: Request, res: Response) => {
+
   const { submissions, meta } = await SubmissionService.getMySubmissions(
     req.user!.id,
     req.query as any,
