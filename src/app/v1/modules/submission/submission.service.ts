@@ -1,6 +1,7 @@
 import { prisma } from "../../../libs/prisma";
 import AppError from "../../../errors/appError";
 import httpStatus from "http-status";
+import { writeAuditLog } from "../../../utils/auditLogger";
 import type {
   ICreateSubmission,
   IReviewSubmission,
@@ -61,10 +62,19 @@ const createSubmission = async (
     );
   }
 
-  return prisma.submission.create({
+  const created = await prisma.submission.create({
     data: { ...payload, studentId },
     select: submissionSelect,
   });
+
+  writeAuditLog({
+    userId: studentId,
+    action: "SUBMISSION_CREATED",
+    targetId: created.id,
+    details: { projectName: created.projectName, projectType: created.projectType },
+  });
+
+  return created;
 };
 
 // ── Student: own submissions ──────────────────────────────────────────────────
@@ -124,6 +134,13 @@ const deleteMySubmission = async (studentId: string, submissionId: string) => {
     );
 
   await prisma.submission.delete({ where: { id: submissionId } });
+
+  writeAuditLog({
+    userId: studentId,
+    action: "SUBMISSION_DELETED",
+    targetId: submissionId,
+    details: { projectName: submission.projectName },
+  });
 };
 
 // ── Mentor: paginated list with server-side filters ───────────────────────────
@@ -201,17 +218,31 @@ const reviewSubmission = async (
     );
   }
 
-  return prisma.submission.update({
+  const updated = await prisma.submission.update({
     where: { id: submissionId },
     data: {
       reviewStatus: payload.reviewStatus,
-      status: payload.reviewStatus, // keep both fields in sync
+      status: payload.reviewStatus,
       reviewComments: payload.reviewComments ?? null,
       reviewedById: mentorId,
       reviewedAt: new Date(),
     },
     select: submissionSelect,
   });
+
+  writeAuditLog({
+    userId: mentorId,
+    action: payload.reviewStatus === "APPROVED" ? "SUBMISSION_APPROVED" : "SUBMISSION_REJECTED",
+    targetId: submissionId,
+    details: {
+      reviewComments: payload.reviewComments ?? null,
+      studentId: updated.student.id,
+      studentName: updated.student.name,
+      projectName: updated.projectName,
+    },
+  });
+
+  return updated;
 };
 
 // ── Aggregated statistics ─────────────────────────────────────────────────────

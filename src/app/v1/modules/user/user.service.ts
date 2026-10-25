@@ -2,6 +2,7 @@ import bcrypt from "bcrypt";
 import { prisma } from "../../../libs/prisma";
 import AppError from "../../../errors/appError";
 import httpStatus from "http-status";
+import { writeAuditLog } from "../../../utils/auditLogger";
 import type { IUpdateProfile, IChangePassword, IUpdateRole, IUserQuery } from "./user.interface";
 
 const SALT_ROUNDS = 12;
@@ -64,10 +65,14 @@ const changePassword = async (userId: string, payload: IChangePassword) => {
         where: { id: userId },
         data: { password: hashed },
     });
+
+    writeAuditLog({ userId, action: "USER_PASSWORD_CHANGED" });
 };
 
 const getAllUsers = async (query: IUserQuery) => {
-    const { page = 1, limit = 10, role, search } = query;
+    const limit = Number(query.limit) || 10;
+    const page = Number(query.page) || 1;
+    const { role, search } = query;
     const skip = (page - 1) * limit;
 
     const where = {
@@ -107,24 +112,41 @@ const getUserById = async (id: string) => {
     return user;
 };
 
-const updateUserRole = async (id: string, payload: IUpdateRole) => {
+// updateUserRole receives the adminId via the controller
+const updateUserRole = async (adminId: string, id: string, payload: IUpdateRole) => {
     const user = await prisma.user.findUnique({ where: { id } });
 
     if (!user) throw new AppError(httpStatus.NOT_FOUND, "User not found");
 
-    return prisma.user.update({
+    const updated = await prisma.user.update({
         where: { id },
         data: { role: payload.role },
         select: safeSelect,
     });
+
+    writeAuditLog({
+        userId: adminId,
+        action: "USER_ROLE_UPDATED",
+        targetId: id,
+        details: { previousRole: user.role, newRole: payload.role },
+    });
+
+    return updated;
 };
 
-const deleteUser = async (id: string) => {
+const deleteUser = async (adminId: string, id: string) => {
     const user = await prisma.user.findUnique({ where: { id } });
 
     if (!user) throw new AppError(httpStatus.NOT_FOUND, "User not found");
 
     await prisma.user.delete({ where: { id } });
+
+    writeAuditLog({
+        userId: adminId,
+        action: "USER_DELETED",
+        targetId: id,
+        details: { deletedEmail: user.email, deletedRole: user.role },
+    });
 };
 
 export const UserService = {

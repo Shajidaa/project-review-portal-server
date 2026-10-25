@@ -40,3 +40,21 @@ enum SubmissionStatus {
     APPROVED
     REJECTED
 }
+
+enum AuditAction {
+    // Submission actions
+    SUBMISSION_CREATED
+    SUBMISSION_APPROVED
+    SUBMISSION_REJECTED
+    SUBMISSION_DELETED
+
+    // User / role actions
+    USER_ROLE_UPDATED
+    USER_DELETED
+
+    // Auth actions
+    USER_REGISTERED
+    USER_LOGIN
+    USER_PASSWORD_CHANGED
+    USER_PASSWORD_RESET
+}

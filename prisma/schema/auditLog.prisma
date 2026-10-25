@@ -1,0 +1,15 @@
+model AuditLog {
+    id       String      @id @default(uuid())
+    userId   String      @map("user_id")
+    user     User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+    action   AuditAction
+    targetId String?     @map("target_id") // e.g. submission id or user id
+    details  Json?       // before/after or relevant context
+
+    createdAt DateTime @default(now()) @map("created_at")
+
+    @@index([userId])
+    @@index([action])
+    @@index([createdAt(sort: Desc)])
+    @@map("audit_logs")
+}
