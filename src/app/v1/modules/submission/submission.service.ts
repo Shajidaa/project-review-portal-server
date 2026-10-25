@@ -71,7 +71,12 @@ const createSubmission = async (
     userId: studentId,
     action: "SUBMISSION_CREATED",
     targetId: created.id,
-    details: { projectName: created.projectName, projectType: created.projectType },
+    details: {
+      projectName: created.projectName,
+      projectType: created.projectType,
+      studentName: created.student.name,
+      studentEmail: created.student.email,
+    },
   });
 
   return created;
@@ -121,6 +126,13 @@ const getMySubmissionById = async (studentId: string, submissionId: string) => {
 const deleteMySubmission = async (studentId: string, submissionId: string) => {
   const submission = await prisma.submission.findUnique({
     where: { id: submissionId },
+    select: {
+      id: true,
+      projectName: true,
+      status: true,
+      studentId: true,
+      student: { select: { name: true, email: true } },
+    },
   });
 
   if (!submission)
@@ -139,7 +151,11 @@ const deleteMySubmission = async (studentId: string, submissionId: string) => {
     userId: studentId,
     action: "SUBMISSION_DELETED",
     targetId: submissionId,
-    details: { projectName: submission.projectName },
+    details: {
+      projectName: submission.projectName,
+      studentName: submission.student.name,
+      studentEmail: submission.student.email,
+    },
   });
 };
 
@@ -238,6 +254,7 @@ const reviewSubmission = async (
       reviewComments: payload.reviewComments ?? null,
       studentId: updated.student.id,
       studentName: updated.student.name,
+      studentEmail: updated.student.email,
       projectName: updated.projectName,
     },
   });

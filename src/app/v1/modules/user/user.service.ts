@@ -128,7 +128,12 @@ const updateUserRole = async (adminId: string, id: string, payload: IUpdateRole)
         userId: adminId,
         action: "USER_ROLE_UPDATED",
         targetId: id,
-        details: { previousRole: user.role, newRole: payload.role },
+        details: {
+            previousRole: user.role,
+            newRole: payload.role,
+            targetName: user.name,
+            targetEmail: user.email,
+        },
     });
 
     return updated;
@@ -145,7 +150,11 @@ const deleteUser = async (adminId: string, id: string) => {
         userId: adminId,
         action: "USER_DELETED",
         targetId: id,
-        details: { deletedEmail: user.email, deletedRole: user.role },
+        details: {
+            targetName: user.name,
+            targetEmail: user.email,
+            targetRole: user.role,
+        },
     });
 };
 
